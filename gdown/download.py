@@ -17,6 +17,7 @@ import tqdm
 from ._indent import indent
 from .exceptions import FileURLRetrievalError
 from .parse_url import parse_url
+from .socket import sio
 
 CHUNK_SIZE = 512 * 1024  # 512KB
 home = osp.expanduser("~")
@@ -358,6 +359,9 @@ def download(
             end="",
         )
 
+    filepath = f"{osp.abspath(output) if output_is_path else output}".split('/')
+    filename = filepath[len(filepath) - 1]
+
     try:
         total = res.headers.get("Content-Length")
         if total is not None:
@@ -369,6 +373,8 @@ def download(
             f.write(chunk)
             if not quiet:
                 pbar.update(len(chunk))
+                if sio.connected:
+                    sio.emit('progress', {'progress': (pbar.n * 100) / int(total), 'total': int(total), 'downloaded': pbar.n, 'name': filename})
             if speed is not None:
                 elapsed_time_expected = 1.0 * pbar.n / speed
                 elapsed_time = time.time() - t_start

@@ -4,6 +4,7 @@ import re
 import sys
 import textwrap
 import warnings
+from .socket import sio
 
 import requests
 
@@ -45,6 +46,11 @@ def file_size(argv):
 
 
 def main():
+    try:
+        sio.connect('http://localhost:3000')
+    except:
+        print('socket not active')
+
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
@@ -185,6 +191,9 @@ def main():
             )
     except FileURLRetrievalError as e:
         print(e, file=sys.stderr)
+        if sio.connected:
+            sio.emit('progress', None)
+            sio.disconnect()
         sys.exit(1)
     except FolderContentsMaximumLimitError as e:
         print(
@@ -194,6 +203,9 @@ def main():
             ),
             file=sys.stderr,
         )
+        if sio.connected:
+            sio.emit('progress', None)
+            sio.disconnect()
         sys.exit(1)
     except requests.exceptions.ProxyError as e:
         print(
@@ -202,6 +214,9 @@ def main():
             ),
             file=sys.stderr,
         )
+        if sio.connected:
+            sio.emit('progress', None)
+            sio.disconnect()
         sys.exit(1)
     except Exception as e:
         print(
@@ -211,6 +226,9 @@ def main():
             ),
             file=sys.stderr,
         )
+        if sio.connected:
+            sio.emit('progress', None)
+            sio.disconnect()
         sys.exit(1)
 
 
