@@ -47,7 +47,7 @@ def file_size(argv):
 
 def main():
     try:
-        sio.connect('http://localhost:3000')
+        sio.connect('http://localhost:5432')
     except:
         print('socket not active')
 
